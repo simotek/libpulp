@@ -1,0 +1,13 @@
+#!/bin/bash
+
+PULP_LIB="/usr/lib64/libpulp.so.0.0.0"
+UPDATE_LIB=$1
+
+for d in /proc/[0-9]*/ ; do
+    PID=${d:6:-1}
+    NEEDS_PATCH=$(find "$d/maps" -type f  -exec grep -q "$UPDATE_LIB" {} \; -exec grep -l "$PULP_LIB" {} \;)
+    if [[ $NEEDS_PATCH ]]; then
+        echo $PID
+	ls -la "/proc/$PID/exe"
+    fi
+done
