@@ -3,10 +3,23 @@
 PULP_LIB="/usr/lib64/libpulp.so.0.0.0"
 UPDATE_LIB=$1
 
+# For each process
+#  Check if lib we want to update is loaded and that libpulp is loaded
+#  Todo: check for applied patch and revert
+#  Call ulp_buildid to get NT_GNU_BUILDID
+#  Check BUILD_ID against each .ulp file, if found apply the live patch.
+
 for d in /proc/[0-9]*/ ; do
     PID=${d:6:-1}
     NEEDS_PATCH=$(find "$d/maps" -type f  -exec grep -q "$UPDATE_LIB" {} \; -exec grep -l "$PULP_LIB" {} \;)
     if [[ $NEEDS_PATCH ]]; then
-        ulp_trigger -p $PID $2
+      BUILD_ID=$(ulp_buildid -p $PID $UPDATE_LIB)
+      #TODO Error exit if BUILD_ID is empty
+      for ulp_file in /usr/lib64/*/*.ulp ; do
+	FILE_BUILD_ID=$(ulp_dump -b $ulp_file)
+    	if [[ "$BUILD_ID" == "$FILE_BUILD_ID" ]] ; then
+          ulp_trigger -p $PID $ulp_file
+	fi	
+      done
     fi
 done
