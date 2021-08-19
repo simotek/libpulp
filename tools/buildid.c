@@ -167,7 +167,7 @@ main(int argc, char **argv)
 
   ret = read_string(&id,target.pid,
                   target.dynobj_libpulp->buildid_buffer);
-  fprintf(stderr,"%s\n", id);
+  fprintf(stdout,"%s\n", id);
 
   return ret;
 }
